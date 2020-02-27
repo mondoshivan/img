@@ -4,9 +4,27 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var sassMiddleware = require('node-sass-middleware');
+var debug = require('debug')('img:app');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+
+const config = require('./config/config');
+const DB_HOST = config.database.host;
+const DB_USER = config.database.user;
+const DB_PASSWORD = config.database.password;
+
+console.log(config);
+
+var MyDb = require('./components/db');
+
+let db_handler = new MyDb('img');
+db_handler.find('CONTACT', {}, function(error, result) {
+    debug(error);
+    debug(result);
+});
+
+
 
 var app = express();
 
