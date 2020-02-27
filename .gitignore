@@ -2,3 +2,4 @@
 img.iml
 node_modules
 .env
+docker/data
