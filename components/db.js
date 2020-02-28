@@ -1,4 +1,7 @@
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectID;
+const config = require('../config/config');
+const debug = require('debug')('img:db');
 
 class DB {
 
@@ -11,6 +14,13 @@ class DB {
         this.db_name = name;
         this.URL = "mongodb://"+USER+":"+PASSWORD+"@"+HOST+":"+PORT;
         this.client = null;
+
+        for (let collection in config.dummyData) {
+            console.log("collection: " + collection);
+            console.log("dummyData: ");
+            console.log(config.dummyData[collection]);
+            this.insertMany(collection, config.dummyData[collection]);
+        }
     }
 
     connect(callback) {
@@ -22,6 +32,14 @@ class DB {
     }
 
     insert(COLLECTION, data, callback) {
+        if (Array.isArray(data)) {
+            this.insertMany(COLLECTION, data, callback)
+        } else {
+            this.insertOne(COLLECTION, data, callback)
+        }
+    }
+
+    insertOne(COLLECTION, data, callback) {
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
@@ -33,10 +51,6 @@ class DB {
         });
     }
 
-    insertOne(COLLECTION, data, callback) {
-        this.insert(COLLECTION, data, callback);
-    }
-
     insertMany(COLLECTION, data, callback) {
         this.connect(() => {
             const db = this.client.db(this.db_name);
@@ -44,12 +58,31 @@ class DB {
             collection.insertMany(data, (error, result) => {
                 if (error) { throw error; }
                 this.close();
-                callback(error, result);
+                if (callback) {callback(error, result);}
             });
         });
     }
 
+    convertId(id) {
+        return new ObjectId(id);
+    }
+
+    convertConfig(config) {
+        const { id } = config;
+        if (id === undefined) { return config; }
+        try {
+            config['_id'] = this.convertId(id);
+            delete config.id;
+        } catch (e) {
+            debug('Converting failed!');
+            debug(config);
+            debug(e);
+        }
+        return config;
+    }
+
     find(COLLECTION, config, callback) {
+        config = this.convertConfig(config);
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
@@ -63,6 +96,7 @@ class DB {
     }
 
     updateOne(COLLECTION, config, changes, callback) {
+        config = this.convertConfig(config);
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
@@ -87,6 +121,7 @@ class DB {
     }
 
     replaceOne(COLLECTION, config, changes, callback) {
+        config = this.convertConfig(config);
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
@@ -99,11 +134,13 @@ class DB {
     }
 
     deleteOne(COLLECTION, config, callback) {
+        config = this.convertConfig(config);
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
             collection.deleteOne(config, (error, result) => {
                 if (error) { throw error; }
+                if (result.deletedCount === 0) { result = null; }
                 this.close();
                 callback(error, result);
             });

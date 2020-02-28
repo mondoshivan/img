@@ -18,7 +18,10 @@ class APIRouterV1 extends Router {
             response.json({name: 'API', version: '1'})
         });
         this.get('/index', IndexRouter.getRoot);
+        this.get('/index/:id', IndexRouter.findModel);
         this.get('/index-page', IndexRouter.getRootPage);
+        this.post('/index', IndexRouter.insert);
+        this.delete('/index/:id', IndexRouter.delete);
     }
 }
 
