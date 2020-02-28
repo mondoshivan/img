@@ -1,5 +1,4 @@
 const { MongoClient } = require('mongodb');
-const debug = require('debug')('img:db');
 
 class DB {
 
@@ -57,6 +56,7 @@ class DB {
             collection.find(config).toArray((error, result) => {
                 if (error) { throw error; }
                 this.close();
+                if (result.length === 0) { result = null; }
                 callback(error, result);
             });
         });
@@ -67,7 +67,7 @@ class DB {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
             collection.updateOne(config, changes, (error, result) => {
-                if (error) { throw error; }
+                if (error) { throw error;}
                 this.close();
                 callback(error, result);
             });

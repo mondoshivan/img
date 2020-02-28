@@ -1,13 +1,22 @@
-var express = require('express');
-var router = express.Router();
+const IndexModel = require('../model/index_model');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render(
-      'index',
-      {
-        title: 'Express'
-      });
-});
+class IndexRouter {
 
-module.exports = router;
+    //-------------------------------
+    static getRoot(request, response) {
+        IndexModel.getModel((error, result) => {
+            if (!error && result) {
+                response.send(result);
+            } else {
+                response.status(404).send('Not found!');
+            }
+        });
+    }
+
+    //-------------------------------
+    static getRootPage(request, response) {
+        response.render('index', { title: 'New Express'});
+    }
+}
+
+module.exports = IndexRouter;
