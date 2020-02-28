@@ -45,6 +45,20 @@ class IndexRouter {
     }
 
     //-------------------------------
+    static update(request, response) {
+        const { id } = request.params;
+        const data = { ...request.body };
+        delete data.id;
+        IndexModel.update(id, data, (error, result) => {
+            if (!error && result) {
+                response.send(result);
+            } else {
+                response.status(404).send('Not found!');
+            }
+        });
+    }
+
+    //-------------------------------
     static delete(request, response) {
         const { id } = request.params;
         IndexModel.delete(id, (error, deleted) => {

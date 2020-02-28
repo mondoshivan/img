@@ -25,6 +25,13 @@ class IndexModel extends Model {
     }
 
     //-------------------------------
+    static update(id, changes, callback) {
+        Model.getDB().updateOne(IndexModel.collection, { id: id }, changes, function(error, result) {
+            callback(error, result);
+        });
+    }
+
+    //-------------------------------
     static delete(id, callback) {
         Model.getDB().deleteOne(IndexModel.collection, { id: id }, function(error, result) {
             callback(error, result);

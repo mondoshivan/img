@@ -97,12 +97,17 @@ class DB {
 
     updateOne(COLLECTION, config, changes, callback) {
         config = this.convertConfig(config);
+        changes = { $set: changes };
+        console.log(config);
+        console.log(changes);
         this.connect(() => {
             const db = this.client.db(this.db_name);
             const collection = db.collection(COLLECTION);
             collection.updateOne(config, changes, (error, result) => {
                 if (error) { throw error;}
                 this.close();
+                console.log(result);
+                if (result.result.n === 0) { result = null; }
                 callback(error, result);
             });
         });
@@ -120,19 +125,6 @@ class DB {
         });
     }
 
-    replaceOne(COLLECTION, config, changes, callback) {
-        config = this.convertConfig(config);
-        this.connect(() => {
-            const db = this.client.db(this.db_name);
-            const collection = db.collection(COLLECTION);
-            collection.replaceOne(config, changes, (error, result) => {
-                if (error) { throw error; }
-                this.close();
-                callback(error, result);
-            });
-        });
-    }
-
     deleteOne(COLLECTION, config, callback) {
         config = this.convertConfig(config);
         this.connect(() => {
@@ -140,8 +132,8 @@ class DB {
             const collection = db.collection(COLLECTION);
             collection.deleteOne(config, (error, result) => {
                 if (error) { throw error; }
-                if (result.deletedCount === 0) { result = null; }
                 this.close();
+                if (result.result.n === 0) { result = null; }
                 callback(error, result);
             });
         });

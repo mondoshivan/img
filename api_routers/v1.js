@@ -21,6 +21,7 @@ class APIRouterV1 extends Router {
         this.get('/index/:id', IndexRouter.findModel);
         this.get('/index-page', IndexRouter.getRootPage);
         this.post('/index', IndexRouter.insert);
+        this.put('/index/:id', IndexRouter.update);
         this.delete('/index/:id', IndexRouter.delete);
     }
 }
